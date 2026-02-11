@@ -1,8 +1,21 @@
-function Card1 () {
+import type { LucideProps } from 'lucide-react';
+
+interface Card1Props{
+    title: string,
+    total: number
+    Icon: React.ComponentType<LucideProps>;
+    iconColor?: string;
+    iconSize?: number;
+}
+
+function Card1 ({ title, total, Icon, iconColor = "black", iconSize = 30 } : Card1Props) {
     return (
-        <div className="h-20 bg-amber-50 w-3xs rounded-lg border border-black p-4 flex flex-col">
-            <p>Total Projects</p>
-            <p>5</p>
+        <div className="w-2xs rounded-lg border border-gray-300 p-4 flex justify-between items-center">
+            <div className="flex flex-col gap-1">
+                <p className="text-gray-700">{title}</p>
+                <p className="font-medium text-2xl">{total}</p>
+            </div>
+            <Icon className={iconColor} size={iconSize}/>
         </div>
     );
 }
