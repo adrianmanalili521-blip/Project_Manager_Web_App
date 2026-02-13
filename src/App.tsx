@@ -1,5 +1,6 @@
 import Card1 from './components/Card1';
 import Filter from './components/Filter';
+import Nav from './components/Nav';
 
 import { LayoutGrid, Clock4, CircleCheck, CircleAlert } from 'lucide-react';
 function App () {
@@ -40,8 +41,9 @@ function App () {
       />
       </div>
 
-      <div className="flex flex-row w-3/4 h-20 items-center">
+      <div className="flex flex-row w-3/4 h-20 items-center gap-5">
         <Filter />
+        <Nav />
       </div>
       
     </div>
