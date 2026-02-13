@@ -2,6 +2,7 @@ import Card1 from './components/Card1';
 import Filter from './components/Filter';
 import Nav from './components/Nav';
 import Viewer from './components/Viewer';
+import NewProjButton from './components/NewProjButton';
 
 import { LayoutGrid, Clock4, CircleCheck, CircleAlert } from 'lucide-react';
 function App () {
@@ -46,6 +47,7 @@ function App () {
         <Filter />
         <Nav />
         <Viewer />
+        <NewProjButton />
       </div>
       
     </div>
