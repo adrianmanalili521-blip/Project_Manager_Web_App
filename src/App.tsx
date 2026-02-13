@@ -3,8 +3,11 @@ import Filter from './components/Filter';
 import Nav from './components/Nav';
 import Viewer from './components/Viewer';
 import NewProjButton from './components/NewProjButton';
+import ProgressBar from './components/ProgressBar';
+import Card2 from './components/Card2';
 
 import { LayoutGrid, Clock4, CircleCheck, CircleAlert } from 'lucide-react';
+
 function App () {
   return (
     <div className="h-screen w-screen flex flex-col p-4 m-4 gap-4">
@@ -43,13 +46,27 @@ function App () {
       />
       </div>
 
-      <div className="flex flex-row w-full h-20 items-center gap-5">
+      <div className="flex flex-row w-full h-20 items-center gap-5 mt-5">
         <Filter />
         <Nav />
         <Viewer />
         <NewProjButton />
       </div>
       
+      <div className="flex flex-row justify-items-start gap-8 h-auto w-full flex-wrap mt-5 ">
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 />
+        <Card2 /> 
+      </div>
     </div>
   );
 }
