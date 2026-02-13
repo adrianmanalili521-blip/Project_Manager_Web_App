@@ -1,4 +1,5 @@
 import Card1 from './components/Card1';
+import Filter from './components/Filter';
 
 import { LayoutGrid, Clock4, CircleCheck, CircleAlert } from 'lucide-react';
 function App () {
@@ -37,7 +38,10 @@ function App () {
         iconColor="text-red-500"
         iconSize={30}
       />
-        
+      </div>
+
+      <div className="flex flex-row w-3/4 h-20 items-center">
+        <Filter />
       </div>
       
     </div>
