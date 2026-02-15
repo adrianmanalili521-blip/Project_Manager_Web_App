@@ -52,3 +52,24 @@ exports.updateProject = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getTotalProjectCount = async (req, res, next) => {
+  try {
+    const count = await projectModel.getTotalCount();
+    res.json(count); // { totalProjects: 10 }
+    console.log(count);
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+exports.getProjectStatusCounts = async (req, res, next) => {
+  try {
+    const counts = await projectModel.getStatusCounts();
+    res.json(counts);
+    console.log(counts);
+  } catch (err) {
+    next(err);
+  }
+};
