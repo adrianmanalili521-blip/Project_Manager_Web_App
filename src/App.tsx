@@ -12,6 +12,9 @@ import { LayoutGrid, Clock4, CircleCheck, CircleAlert } from 'lucide-react';
 
 function App () {
   const [projects, setProjects] = useState([]);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [difficultyFilter, setDifficultyFilter] = useState('all');
 
   useEffect(() => {
     const getProjects = async () => {
@@ -97,7 +100,14 @@ function App () {
       </div>
 
       <div className="flex flex-row w-full h-20 items-center gap-5 mt-5">
-        <Filter />
+        <Filter
+          search={search}
+          onSearch={setSearch}
+          status={statusFilter}
+          onStatus={setStatusFilter}
+          difficulty={difficultyFilter}
+          onDifficulty={setDifficultyFilter}
+        />
         <Nav />
         <Viewer />
         <NewProjButton />
@@ -105,7 +115,19 @@ function App () {
       
       <div className="flex flex-row justify-items-start gap-8 h-auto w-full flex-wrap mt-5 ">
         {projects && projects.length > 0 ? (
-          projects.map((p:any, index:number) => (
+          projects
+            .filter((p:any) => {
+              const q = search.trim().toLowerCase();
+              if (q) {
+                const inTitle = (p.title || '').toLowerCase().includes(q);
+                const inDesc = (p.description || '').toLowerCase().includes(q);
+                if (!inTitle && !inDesc) return false;
+              }
+              if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+              if (difficultyFilter !== 'all' && String((p.difficulty || '').toLowerCase()) !== difficultyFilter) return false;
+              return true;
+            })
+            .map((p:any, index:number) => (
             <Card2
               key={p.id ?? p._id ?? index}
               title={p.title}
