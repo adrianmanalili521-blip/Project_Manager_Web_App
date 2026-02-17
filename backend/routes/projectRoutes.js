@@ -7,7 +7,7 @@ router.get('/total-count', controller.getTotalProjectCount);
 router.get('/status-counts', controller.getProjectStatusCounts);
 
 // GET all projects
-router.get('/', controller.getAllProjects);
+router.get('/all-projects', controller.getAllProjects);
 
 // GET a single project by ID
 router.get('/:id', controller.getProjectById);

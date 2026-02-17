@@ -16,7 +16,7 @@ function App () {
   useEffect(() => {
     const getProjects = async () => {
       try {
-        const res = await fetch('http://localhost:3001/projects');
+        const res = await fetch('http://localhost:3001/projects/all-projects');
         const data = await res.json();
         setProjects(data);
       } catch (err) {
@@ -104,18 +104,24 @@ function App () {
       </div>
       
       <div className="flex flex-row justify-items-start gap-8 h-auto w-full flex-wrap mt-5 ">
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 />
-        <Card2 /> 
+        {projects && projects.length > 0 ? (
+          projects.map((p:any, index:number) => (
+            <Card2
+              key={p.id ?? p._id ?? index}
+              title={p.title}
+              description={p.description}
+              status={p.status}
+              difficulty={p.difficulty}
+              taskCount={p.taskCount}
+              taskTotal={p.tasktotal ?? p.taskTotal ?? 0}
+              peopleCount={p.peopleCount}
+              dateCreated={p.dateCreate ? new Date(p.dateCreate) : new Date()}
+              dueDate={p.dueDate ? new Date(p.dueDate) : new Date()}
+            />
+          ))
+        ) : (
+          <p>No projects found</p>
+        )}
       </div>
     </div>
   );

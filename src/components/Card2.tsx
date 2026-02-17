@@ -2,31 +2,46 @@ import ProgressBar from './ProgressBar';
 
 import { Users, Calendar } from 'lucide-react';
 
-function Card2 () {
+interface Card2Props {
+    title : string,
+    description : string,
+    status : 'in_progress' | 'completed' | 'overdue' | 'planning' | 'on_hold',
+    difficulty : string,
+    taskCount : number,
+    taskTotal : number,
+    peopleCount : number,
+    dateCreated : Date,
+    dueDate : Date
+};
+
+function Card2 ( {title, description, status, difficulty, taskCount, taskTotal, peopleCount, dateCreated, dueDate} : Card2Props ) {
+    const formattedDue = dueDate instanceof Date ? dueDate.toLocaleDateString() : String(dueDate);
+    const formattedCreated = dateCreated instanceof Date ? dateCreated.toLocaleDateString() : String(dateCreated);
+
     return (
         <div className="h-85 w-90 border border-gray-300 rounded-md p-5 hover:cursor-pointer">
             <div className="flex flex-col">
-                <p className="font-medium">Title</p>
-                <p className="text-gray-600 mt-2">Description</p>
+                <p className="font-medium">{title}</p>
+                <p className="text-gray-600 mt-2">{description}</p>
             </div>
 
             <div className="flex flex-row mt-8 gap-2">
-                <div className="flex flex-row justify-center items-center w-25 bg-amber-100 border-none rounded-md text-orange-700"><p>In Progress</p></div>
-                <p className="flex flex-row justify-center items-center w-12 bg-red-200 border-none rounded-md text-red-500">High</p>
+                <div className="flex flex-row justify-center items-center w-25 bg-amber-100 border-none rounded-md text-orange-700"><p>{status}</p></div>
+                <p className="flex flex-row justify-center items-center w-12 bg-red-200 border-none rounded-md text-red-500">{difficulty}</p>
             </div>
             <div className="mt-2">
-                <ProgressBar />
+                <ProgressBar value={taskCount} max={taskTotal} />
             </div>
 
             <div className="flex flex-row justify-items-start items-center mt-7 gap-5">
                 <div className="flex flex-row gap-2 justify-center items-center text-gray-600">
                     <Users size={20}/>
-                    <p>5</p>
+                    <p>{peopleCount}</p>
                 </div>
                 
                 <div className="flex flex-row justify-center items-center text-gray-600 gap-1">
                     <Calendar size={20}/>
-                    <p>15/03/2026</p>
+                    <p>{formattedDue}</p>
                 </div>
 
                 <button className="font-medium">View Details</button>
