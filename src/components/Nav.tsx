@@ -1,10 +1,33 @@
-function Nav () {
+interface NavProps {
+    status: string;
+    onStatus: (v: string) => void;
+}
+
+const statuses: { key: string; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'planning', label: 'Planning' },
+    { key: 'in_progress', label: 'In Progress' },
+    { key: 'completed', label: 'Completed' },
+    { key: 'overdue', label: 'Overdue' },
+    { key: 'on_hold', label: 'On Hold' },
+];
+
+function Nav({ status, onStatus }: NavProps) {
     return (
-        <div className="flex flex-row justify-center items-center h-8 w-80 bg-gray-200 p-2 gap-2 border-none rounded-xl">
-            <button className="bg-transparent h-6 w-10 border-none rounded-xl focus-within:bg-gray-50"><p className="font-medium"></p>All</button>
-            <button className="bg-transparent h-6 w-22 border-none rounded-xl focus-within:bg-gray-50"><p className="font-medium"></p>Planning</button>
-            <button className="bg-transparent h-6 w-28 border-none rounded-xl focus-within:bg-gray-50"><p className="font-medium"></p>In Progress</button>
-            <button className="bg-transparent h-6 w-26 border-none rounded-xl focus-within:bg-gray-50"><p className="font-medium"></p>Completed</button>
+        <div className="flex flex-row justify-center items-center h-8 w-auto bg-gray-200 p-2 gap-2 border-none rounded-xl">
+            {statuses.map(s => {
+                const active = status === s.key;
+                return (
+                    <button
+                        key={s.key}
+                        onClick={() => onStatus(s.key)}
+                        className={`h-8 px-3 rounded-xl transition-colors text-sm ${active ? 'bg-white font-semibold shadow' : 'bg-transparent'}`}
+                        aria-pressed={active}
+                    >
+                        {s.label}
+                    </button>
+                )
+            })}
         </div>
     )
 }

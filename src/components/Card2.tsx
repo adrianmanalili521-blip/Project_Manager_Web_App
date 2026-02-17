@@ -12,17 +12,19 @@ interface Card2Props {
     peopleCount : number,
     dateCreated : Date,
     dueDate : Date
+    view: 'grid' | 'list'
 };
 
-function Card2 ( {title, description, status, difficulty, taskCount, taskTotal, peopleCount, dateCreated, dueDate} : Card2Props ) {
+function Card2 ( {title, description, status, difficulty, taskCount, taskTotal, peopleCount, dateCreated, dueDate, view} : Card2Props ) {
     const formattedDue = dueDate instanceof Date ? dueDate.toLocaleDateString() : String(dueDate);
     const formattedCreated = dateCreated instanceof Date ? dateCreated.toLocaleDateString() : String(dateCreated);
+    const shortDescription = description && description.length > 120 ? description.slice(0,120) + '...' : description;
 
     return (
-        <div className="h-85 w-90 border border-gray-300 rounded-md p-5 hover:cursor-pointer">
+        <div className="h-85 border border-gray-300 rounded-md p-5 hover:cursor-pointer w-full">
             <div className="flex flex-col">
                 <p className="font-medium">{title}</p>
-                <p className="text-gray-600 mt-2">{description}</p>
+                <p className="text-gray-600 mt-2">{view === 'grid' ? shortDescription : description}</p>
             </div>
 
             <div className="flex flex-row mt-8 gap-2">
