@@ -11,6 +11,7 @@ import Card2 from './components/Card2';
 import { LayoutGrid, Clock4, CircleCheck, CircleAlert } from 'lucide-react';
 
 function App () {
+  
   const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

@@ -21,7 +21,7 @@ function Card2 ( {title, description, status, difficulty, taskCount, taskTotal, 
     const shortDescription = description && description.length > 120 ? description.slice(0,120) + '...' : description;
 
     return (
-        <div className="h-85 border border-gray-300 rounded-md p-5 hover:cursor-pointer w-full">
+        <div className="h-85 border border-gray-300 rounded-md p-5 hover:cursor-pointer w-full bg-white">
             <div className="flex flex-col">
                 <p className="font-medium">{title}</p>
                 <p className="text-gray-600 mt-2">{view === 'grid' ? shortDescription : description}</p>
