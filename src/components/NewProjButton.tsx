@@ -1,18 +1,16 @@
 import { Plus } from 'lucide-react';
 
 interface NewProjButtonProps {
-    onOpen: () => void;
+  onOpen: () => void;
 }
 
 function NewProjButton({ onOpen }: NewProjButtonProps) {
-    return (
-        <button onClick={onOpen} aria-label="Open new project form">
-            <div className="h-8 w-35 bg-slate-950 flex flex-row justify-center items-center border-none rounded-lg gap-2 hover:bg-slate-950/90">
-                <Plus size={18} className="text-gray-300"/>
-                <p className="font-medium text-gray-50">New Project</p>
-            </div>
-        </button>
-    )
+  return (
+    <button onClick={onOpen} aria-label="Open new project form" className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+      <Plus size={18} className="text-white" />
+      New Project
+    </button>
+  );
 }
 
 export default NewProjButton;

@@ -1,5 +1,18 @@
 const db = require('../db');
 
+// Helper function to format ISO datetime to MySQL DATETIME format
+const formatDateToMySQL = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 // Get all projects
 exports.getAll = async () => {
   const [rows] = await db.query("SELECT * FROM projects");
@@ -15,11 +28,14 @@ exports.getById = async (id) => {
 // Create project
 exports.create = async (data) => {
   const { title, description, peopleCount, dateCreate, dueDate, taskCount, tasktotal, difficulty, status } = data;
+  const formattedDateCreate = formatDateToMySQL(dateCreate);
+  const formattedDueDate = formatDateToMySQL(dueDate);
+  
   const [result] = await db.query(
     `INSERT INTO projects 
     (title, description, peopleCount, dateCreate, dueDate, taskCount, tasktotal, difficulty, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [title, description, peopleCount, dateCreate, dueDate, taskCount, tasktotal, difficulty, status]
+    [title, description, peopleCount, formattedDateCreate, formattedDueDate, taskCount, tasktotal, difficulty, status]
   );
   return { id: result.insertId, ...data };
 };
@@ -58,11 +74,14 @@ exports.deleteById = async (id) => {
 // Update project by id
 exports.updateById = async (id, data) => {
   const { title, description, peopleCount, dateCreate, dueDate, taskCount, tasktotal, difficulty, status } = data;
+  const formattedDateCreate = formatDateToMySQL(dateCreate);
+  const formattedDueDate = formatDateToMySQL(dueDate);
+  
   const [result] = await db.query(
     `UPDATE projects 
      SET title = ?, description = ?, peopleCount = ?, dateCreate = ?, dueDate = ?, taskCount = ?, tasktotal = ?, difficulty = ?, status = ?
      WHERE id = ?`,
-    [title, description, peopleCount, dateCreate, dueDate, taskCount, tasktotal, difficulty, status, id]
+    [title, description, peopleCount, formattedDateCreate, formattedDueDate, taskCount, tasktotal, difficulty, status, id]
   );
   if (result.affectedRows === 0) return null;
   return { id, ...data };

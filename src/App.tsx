@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 //my components
 import Card1 from './components/Card1';
@@ -10,14 +10,14 @@ import Card2 from './components/Card2';
 
 import { LayoutGrid, Clock4, CircleCheck, CircleAlert } from 'lucide-react';
 
-function App () {
-  
-  const [projects, setProjects] = useState([]);
+function App() {
+  const [projects, setProjects] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [showNew, setShowNew] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -27,197 +27,219 @@ function App () {
   const [newPeopleCount, setNewPeopleCount] = useState(1);
   const [newTaskCount, setNewTaskCount] = useState(0);
 
+  const [statusCounts, setStatusCounts] = useState({ in_progress: 0, overdue: 0, completed: 0 });
+  const [totalProjects, setTotalProjects] = useState(0);
+
+  const clearNewProjectForm = () => {
+    setNewTitle('');
+    setNewDescription('');
+    setNewStatus('planning');
+    setNewDifficulty('medium');
+    setNewDueDate('');
+    setNewPeopleCount(1);
+    setNewTaskCount(0);
+  };
+
   const fetchProjects = async () => {
     try {
       const res = await fetch('http://localhost:3001/projects/all-projects');
+      if (!res.ok) throw new Error('Fetch failed');
       const data = await res.json();
-      setProjects(data);
+      setProjects(Array.isArray(data) ? data : []);
+      setError(null);
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      setError('Unable to load projects. Check your backend connection.');
+    }
+  };
+
+  const fetchStatusCounts = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/projects/status-counts');
+      if (!res.ok) throw new Error('Fetch failed');
+      const data = await res.json();
+      setStatusCounts(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchTotal = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/projects/total-count');
+      if (!res.ok) throw new Error('Fetch failed');
+      const data = await res.json();
+      setTotalProjects(data.totalProjects ?? 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const createProject = async () => {
+    if (!newTitle.trim() || !newDescription.trim()) {
+      setError('Please provide a title and description for the new project.');
+      return;
+    }
+
+    const payload = {
+      title: newTitle.trim(),
+      description: newDescription.trim(),
+      peopleCount: Math.max(1, newPeopleCount),
+      dateCreate: new Date().toISOString(),
+      dueDate: newDueDate || null,
+      taskCount: Math.max(0, newTaskCount),
+      tasktotal: Math.max(0, newTaskCount),
+      difficulty: newDifficulty,
+      status: newStatus,
+    };
+
+    try {
+      const res = await fetch('http://localhost:3001/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error('Failed to create project');
+      await fetchProjects();
+      fetchStatusCounts();
+      fetchTotal();
+      clearNewProjectForm();
+      setShowNew(false);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError('Unable to create the project. Please try again.');
     }
   };
 
   useEffect(() => {
     fetchProjects();
-  }, []);
-
-  const [statusCounts, setStatusCounts] = useState({ in_progress: 0, overdue: 0, completed: 0 });
-
-  useEffect(() => {
-    const fetchStatusCounts = async () => {
-      try {
-        const res = await fetch('http://localhost:3001/projects/status-counts');
-        const data = await res.json();
-        setStatusCounts(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchStatusCounts();
-  }, []);
-
-  const [totalProjects, setTotalProjects] = useState(0);
-
-  useEffect(() => {
-    const fetchTotal = async () => {
-      try {
-        const res = await fetch('http://localhost:3001/projects/total-count');
-        const data = await res.json();
-        setTotalProjects(data.totalProjects);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchTotal();
   }, []);
 
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project: any) => {
+      const query = search.trim().toLowerCase();
+      if (query) {
+        const titleMatch = (project.title || '').toLowerCase().includes(query);
+        const descMatch = (project.description || '').toLowerCase().includes(query);
+        if (!titleMatch && !descMatch) return false;
+      }
+
+      if (statusFilter !== 'all' && project.status !== statusFilter) return false;
+      if (difficultyFilter !== 'all' && String((project.difficulty || '').toLowerCase()) !== difficultyFilter) return false;
+
+      return true;
+    });
+  }, [projects, search, statusFilter, difficultyFilter]);
 
   return (
-    <div className="h-screen w-screen flex flex-col p-4 m-4 gap-4">
-      <div className="flex flex-col">
-        <p className="text-4xl font-medium">Project Manager</p>
-        <p className="text-gray-600 mt-2">Track and manage all your projects in one place</p>
-      </div>
-      <div className="flex flex-row h-25 w-full gap-5 mt-5">
-      <Card1 
-        title="Total Projects"
-        total={totalProjects}
-        Icon={LayoutGrid}
-        iconColor="text-sky-600"
-        iconSize={30}
-      />
-      <Card1 
-        title="In Progress"
-        total={statusCounts.in_progress}
-        Icon={Clock4}
-        iconColor="text-amber-400"
-        iconSize={30}
-      />
-      <Card1 
-        title="Completed"
-        total={statusCounts.completed}
-        Icon={CircleCheck}
-        iconColor="text-green-400"
-        iconSize={30}
-      />
-      <Card1 
-        title="Overdue"
-        total={statusCounts.overdue}
-        Icon={CircleAlert}
-        iconColor="text-red-500"
-        iconSize={30}
-      />
-      </div>
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-6 rounded-3xl bg-white p-6 shadow-sm">
+          <h1 className="text-4xl font-semibold text-slate-950">Project Manager</h1>
+          <p className="mt-2 max-w-2xl text-slate-600">
+            Track and manage all your projects, deadlines, and team load in one polished dashboard.
+          </p>
+        </header>
 
-      <div className="flex flex-row w-full h-20 items-center gap-5 mt-5">
-        <Filter
-          search={search}
-          onSearch={setSearch}
-          status={statusFilter}
-          onStatus={setStatusFilter}
-          difficulty={difficultyFilter}
-          onDifficulty={setDifficultyFilter}
-        />
-        <Nav status={statusFilter} onStatus={setStatusFilter} />
-        <Viewer view={view} onView={setView} />
-        <NewProjButton onOpen={() => setShowNew(true)} />
-      </div>
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card1 title="Total Projects" total={totalProjects} Icon={LayoutGrid} iconColor="text-sky-600" iconSize={30} />
+          <Card1 title="In Progress" total={statusCounts.in_progress} Icon={Clock4} iconColor="text-amber-500" iconSize={30} />
+          <Card1 title="Completed" total={statusCounts.completed} Icon={CircleCheck} iconColor="text-emerald-500" iconSize={30} />
+          <Card1 title="Overdue" total={statusCounts.overdue} Icon={CircleAlert} iconColor="text-rose-500" iconSize={30} />
+        </section>
 
-      {showNew && (
-        <div className="mt-4 p-4 border rounded-md bg-white w-full max-w-xl">
-          <h3 className="text-lg font-medium mb-2">Create New Project</h3>
-          <div className="flex flex-col gap-2">
-            <input className="border p-2 rounded" placeholder="Title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
-            <textarea className="border p-2 rounded" placeholder="Description" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} />
-            <div className="flex gap-2">
-              <select className="border p-2 rounded" value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                <option value="planning">Planning</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="overdue">Overdue</option>
-                <option value="on_hold">On Hold</option>
-              </select>
-              <select className="border p-2 rounded" value={newDifficulty} onChange={(e) => setNewDifficulty(e.target.value)}>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-              <input type="date" className="border p-2 rounded" value={newDueDate} onChange={(e) => setNewDueDate(e.target.value)} />
-            </div>
-            <div className="flex gap-2">
-              <input type="number" className="border p-2 rounded w-32" value={newPeopleCount} onChange={(e) => setNewPeopleCount(Number(e.target.value))} />
-              <input type="number" className="border p-2 rounded w-32" value={newTaskCount} onChange={(e) => setNewTaskCount(Number(e.target.value))} />
-            </div>
-            <div className="flex gap-2 mt-2">
-              <button className="px-4 py-2 bg-slate-900 text-white rounded" onClick={async () => {
-                const payload = {
-                  title: newTitle,
-                  description: newDescription,
-                  peopleCount: newPeopleCount,
-                  dateCreate: new Date().toISOString(),
-                  dueDate: newDueDate || null,
-                  taskCount: newTaskCount,
-                  tasktotal: newTaskCount,
-                  difficulty: newDifficulty,
-                  status: newStatus
-                };
-                try {
-                  const res = await fetch('http://localhost:3001/projects', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                  });
-                  if (!res.ok) throw new Error('Failed to create project');
-                  // refresh list and close form
-                  await fetchProjects();
-                  setShowNew(false);
-                  // reset
-                  setNewTitle(''); setNewDescription(''); setNewPeopleCount(1); setNewTaskCount(0);
-                } catch (err) {
-                  console.error(err);
-                }
-              }}>Create</button>
-              <button className="px-4 py-2 border rounded" onClick={() => setShowNew(false)}>Cancel</button>
+        <section className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <Filter search={search} onSearch={setSearch} status={statusFilter} onStatus={setStatusFilter} difficulty={difficultyFilter} onDifficulty={setDifficultyFilter} />
+            <Nav status={statusFilter} onStatus={setStatusFilter} />
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Viewer view={view} onView={setView} />
+            <NewProjButton onOpen={() => setShowNew(true)} />
+          </div>
+        </section>
+
+        {error && (
+          <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </div>
+        )}
+
+        {showNew && (
+          <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/60 p-4">
+            <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-semibold text-slate-950">Create New Project</h2>
+                  <p className="mt-1 text-sm text-slate-600">Add a new project to the dashboard.</p>
+                </div>
+                <button className="rounded-full bg-slate-100 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200" onClick={() => setShowNew(false)}>
+                  Close
+                </button>
+              </div>
+
+              <div className="grid gap-4">
+                <input className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400" placeholder="Title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+                <textarea className="min-h-[120px] rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400" placeholder="Description" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} />
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <select className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400" value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
+                    <option value="planning">Planning</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="on_hold">On Hold</option>
+                  </select>
+                  <select className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400" value={newDifficulty} onChange={(e) => setNewDifficulty(e.target.value)}>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                  <input type="date" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400" value={newDueDate} onChange={(e) => setNewDueDate(e.target.value)} />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input type="number" min={1} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400" value={newPeopleCount} onChange={(e) => setNewPeopleCount(Number(e.target.value) || 1)} placeholder="Team size" />
+                  <input type="number" min={0} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400" value={newTaskCount} onChange={(e) => setNewTaskCount(Number(e.target.value) || 0)} placeholder="Task count" />
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                  <button className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" onClick={() => setShowNew(false)}>
+                    Cancel
+                  </button>
+                  <button className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800" onClick={createProject}>
+                    Create project
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      
-      <div className={view === 'grid' ? 'flex flex-row justify-items-start gap-8 h-auto w-full flex-wrap mt-5' : 'flex flex-col items-center gap-8 h-auto w-full mt-5'}>
-        {projects && projects.length > 0 ? (
-          projects
-            .filter((p:any) => {
-              const q = search.trim().toLowerCase();
-              if (q) {
-                const inTitle = (p.title || '').toLowerCase().includes(q);
-                const inDesc = (p.description || '').toLowerCase().includes(q);
-                if (!inTitle && !inDesc) return false;
-              }
-              if (statusFilter !== 'all' && p.status !== statusFilter) return false;
-              if (difficultyFilter !== 'all' && String((p.difficulty || '').toLowerCase()) !== difficultyFilter) return false;
-              return true;
-            })
-            .map((p:any, index:number) => (
-            <div key={p.id ?? p._id ?? index} className={view === 'grid' ? 'w-90' : 'w-3/4'}>
+        )}
+
+        <section className={`mt-8 grid gap-6 ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+          {filteredProjects.length > 0 ? (
+            filteredProjects.map((project: any, index: number) => (
               <Card2
-                title={p.title}
-                description={p.description}
-                status={p.status}
-                difficulty={p.difficulty}
-                taskCount={p.taskCount}
-                taskTotal={p.tasktotal ?? p.taskTotal ?? 0}
-                peopleCount={p.peopleCount}
-                dateCreated={p.dateCreate ? new Date(p.dateCreate) : new Date()}
-                dueDate={p.dueDate ? new Date(p.dueDate) : new Date()}
+                key={project.id ?? project._id ?? index}
+                title={project.title}
+                description={project.description}
+                status={project.status}
+                difficulty={project.difficulty}
+                taskCount={project.taskCount}
+                taskTotal={project.tasktotal ?? project.taskTotal ?? 0}
+                peopleCount={project.peopleCount}
+                dateCreated={project.dateCreate ? new Date(project.dateCreate) : new Date()}
+                dueDate={project.dueDate ? new Date(project.dueDate) : new Date()}
                 view={view}
               />
+            ))
+          ) : (
+            <div className="rounded-3xl bg-white p-8 text-center text-slate-600 shadow-sm">
+              No projects found for the selected filters or search.
             </div>
-          ))
-        ) : (
-          <p>No projects found</p>
-        )}
+          )}
+        </section>
       </div>
     </div>
   );

@@ -1,73 +1,98 @@
-# React + TypeScript + Vite
+# Project Manager Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack project management dashboard built with React, TypeScript, Vite, Tailwind CSS, and an Express/MySQL backend.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This repository contains:
 
-## React Compiler
+- A frontend app in the root folder (`src/`, `package.json`, `vite.config.ts`)
+- A backend API under `backend/`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The frontend consumes the backend API to display project cards, summary metrics, and filters.
 
-## Expanding the ESLint configuration
+## Key Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Dashboard cards for total projects, in-progress, completed, and overdue counts
+- Search projects by title or description
+- Filter by project status and difficulty
+- Grid/list view toggle
+- Create new projects from the frontend
+- Responsive modern UI with Tailwind CSS
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Technologies
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Frontend: React, TypeScript, Vite, Tailwind CSS, framer-motion, lucide-react
+- Backend: Node.js, Express, MySQL, mysql2, dotenv, CORS
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Setup
+
+### 1. Backend
+
+```bash
+cd /home/adrian/projects/Project_Manager_Web_App/backend
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Create a `.env` file in `backend/` with your database credentials:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=your_database_name
 ```
+
+Start the backend server:
+
+```bash
+npm run start
+```
+
+For development with auto reload:
+
+```bash
+npm run dev
+```
+
+The backend runs on `http://localhost:3001`.
+
+### 2. Frontend
+
+```bash
+cd /home/adrian/projects/Project_Manager_Web_App
+npm install
+npm run dev
+```
+
+Open the local URL shown by Vite, typically `http://localhost:5173`.
+
+## Available API Endpoints
+
+The backend exposes these routes under `/projects`:
+
+- `GET /projects/all-projects` — get all projects
+- `GET /projects/total-count` — get total project count
+- `GET /projects/status-counts` — get project counts by status
+- `GET /projects/:id` — get a single project
+- `POST /projects` — create a new project
+- `DELETE /projects/:id` — delete a project
+- `PUT /projects/:id` — update a project
+
+## Notes
+
+- Ensure the backend is running before opening the frontend.
+- If you change the backend port, update the fetch URLs in `src/App.tsx`.
+- The backend expects a MySQL `projects` table matching the project model fields.
+
+## Recommended Improvements
+
+- Add CRUD buttons to project cards
+- Add data validation and form feedback
+- Add database seeding or migrations
+- Add authentication for multi-user support
+
+## License
+
+No license is currently specified.
