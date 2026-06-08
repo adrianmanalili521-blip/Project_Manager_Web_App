@@ -5,11 +5,21 @@ A full-stack project management dashboard built with React, TypeScript, Vite, Ta
 ## Overview
 
 This repository contains:
-
 - A frontend app in the root folder (`src/`, `package.json`, `vite.config.ts`)
 - A backend API under `backend/`
 
 The frontend consumes the backend API to display project cards, summary metrics, and filters.
+
+## Application Preview
+
+### Dashboard Overview
+<img width="1291" height="729" alt="Dashboard Overview" src="https://github.com/user-attachments/assets/b9eba494-8643-489d-873f-992943fbd4a9" />
+
+### Project Grid & Filters
+<img width="1291" height="729" alt="Project Grid and Filters" src="https://github.com/user-attachments/assets/af132454-afc2-411f-974c-1702d49b38b4" />
+
+### Project Creation Modal
+<img width="1291" height="729" alt="Project Creation Modal" src="https://github.com/user-attachments/assets/7f84b133-e88c-4c79-a974-43341947e110" />
 
 ## Key Features
 
@@ -22,8 +32,8 @@ The frontend consumes the backend API to display project cards, summary metrics,
 
 ## Technologies
 
-- Frontend: React, TypeScript, Vite, Tailwind CSS, framer-motion, lucide-react
-- Backend: Node.js, Express, MySQL, mysql2, dotenv, CORS
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS, framer-motion, lucide-react
+- **Backend:** Node.js, Express, MySQL, mysql2, dotenv, CORS
 
 ## Setup
 
@@ -44,14 +54,17 @@ DB_PASSWORD=your_db_password
 DB_NAME=your_database_name
 ```
 
-Start the backend server:
+To clear your database table and seed it with 10 sample projects:
+```bash
+npm run seed
+```
 
+Start the backend server:
 ```bash
 npm run start
 ```
 
 For development with auto reload:
-
 ```bash
 npm run dev
 ```
@@ -90,7 +103,6 @@ The backend exposes these routes under `/projects`:
 
 - Add CRUD buttons to project cards
 - Add data validation and form feedback
-- Add database seeding or migrations
 - Add authentication for multi-user support
 
 ## License
